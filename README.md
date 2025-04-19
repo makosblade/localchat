@@ -1,86 +1,37 @@
 # LocalChat
 
-A ChatGPT-like interface for interacting with AI models hosted at user-configured endpoints, with special support for Ollama streaming responses.
+## Executive Summary
+
+LocalChat is a self-hosted web application that allows users to chat with AI models hosted at user-configured URLs. It provides a ChatGPT-like interface for interacting with any compatible AI model API, giving users full control over which models they use and where those models are hosted. LocalChat is perfect for developers, privacy-conscious users, and anyone who wants to interact with locally hosted or custom AI models through a familiar chat interface.
+
+Key Features:
+- **Profile Management**: Create, edit, and delete profiles with customizable API URLs, model names, and token sizes
+- **Flexible API Integration**: Connect to any compatible API endpoint, including local models via Ollama
+- **Chat Interface**: Modern UI with message history, Markdown rendering, and syntax highlighting
+- **Streaming Responses**: Real-time streaming of AI responses with the ability to stop generation
+- **Persistent History**: All conversations are saved and can be accessed later
+- **Keyboard Shortcuts**: Efficient navigation and control with keyboard shortcuts
 
 ## Features
 
-- Create and manage profiles for different AI model endpoints
-- Configure model URL, name, and token size for each profile
-- Chat with selected models through a familiar interface
-- Real-time streaming responses when using Ollama models
-- Persistent chat history
-- Detailed error handling and logging
+### Profile Management
+Create and manage profiles for different AI models with customizable settings:
+- API URL configuration
+- Model name selection
+- Token size adjustment
+- Automatic model discovery for Ollama
 
-## Tech Stack
+### Chat Interface
+- Real-time Markdown rendering with syntax highlighting
+- Streaming responses with stop capability
+- Message history navigation
+- Keyboard shortcuts for efficient interaction
 
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS
-- **Backend**: Python, FastAPI, SQLAlchemy
-- **Database**: SQLite
+### User Experience
+- Immediate message display with optimistic updates
+- Chat history sidebar for quick navigation between conversations
+- Tooltips for all action buttons
+- Keyboard shortcuts (H: toggle history, S: toggle streaming, R: refresh, ESC: close sidebar)
 
-## Setup
-
-### Backend
-
-1. Navigate to the backend directory:
-   ```
-   cd backend
-   ```
-
-2. Install dependencies with Poetry:
-   ```
-   poetry install
-   ```
-
-3. Start the backend server:
-   ```
-   poetry run uvicorn localchat.main:app --reload
-   ```
-
-### Frontend
-
-1. Navigate to the frontend directory:
-   ```
-   cd frontend
-   ```
-
-2. Install dependencies with PNPM:
-   ```
-   pnpm install
-   ```
-
-3. Start the development server:
-   ```
-   pnpm dev
-   ```
-
-4. Open your browser and navigate to http://localhost:5173
-
-## Usage
-
-1. Create a profile with your model endpoint details
-   - For Ollama, use the URL format: `http://localhost:11434/api/generate`
-   - The app will automatically detect Ollama endpoints and enable streaming
-2. Select the profile to start a chat session
-3. Start chatting with the AI model!
-4. Toggle streaming on/off using the lightning bolt icon in the chat interface
-
-## Ollama Integration
-
-LocalChat has special support for [Ollama](https://ollama.ai/), a tool for running large language models locally:
-
-- **Streaming Responses**: See the model's response in real-time as it's being generated
-- **Automatic URL Detection**: The app will automatically detect Ollama endpoints and configure them correctly
-- **Model Suggestions**: When creating an Ollama profile, you'll get suggestions for popular models
-
-### Setting up Ollama
-
-1. Install Ollama from [ollama.ai](https://ollama.ai/)
-2. Pull a model: `ollama pull llama3.2`
-3. Start Ollama
-4. In LocalChat, create a profile with:
-   - URL: `http://localhost:11434/api/generate`
-   - Model name: `llama3.2` (or any other model you've pulled)
-
-## License
-
-MIT
+## Contributing
+Contributions are welcome! Please feel free to submit a PR.
