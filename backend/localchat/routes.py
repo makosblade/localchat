@@ -1,15 +1,12 @@
 from typing import List, Optional, Dict, Any
 import logging
 import uuid
-import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, BackgroundTasks
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
 
 from .models import (
-    Profile, ProfileCreate, ProfileModel,
-    Chat, ChatCreate, ChatModel,
-    Message, MessageCreate, MessageModel
+    Profile, ProfileCreate,
+    Chat, ChatCreate,
+    Message, MessageCreate,
 )
 from .error_handlers import ModelAPIException, DatabaseException
 from .exceptions import (
@@ -26,9 +23,7 @@ from .exceptions import (
 )
 from .services.profile_service import ProfileService
 from .services.chat_service import ChatService
-from .services.model_service import ModelService
 from .services.message_service import MessageService
-from .streaming import stream_model_response, create_streaming_response
 from .services.provider_service import ProviderService
 
 from .utils import get_db_dependency

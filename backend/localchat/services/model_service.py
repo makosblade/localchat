@@ -196,34 +196,3 @@ class ModelService:
                 detail=error_message,
                 original_exception=e
             )
-
-
-    """
-    Service for direct communication with model APIs (Ollama, OpenAI, etc.), including streaming and response parsing.
-    """
-    @staticmethod
-    async def stream_model_response(
-        url: str,
-        model_name: str,
-        messages: List[MessageModel],
-        token_size: Optional[int] = None,
-        provider: str = "ollama",
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
-        stream: bool = True
-    ) -> AsyncGenerator[str, None]:
-        """Stream a response from a model provider."""
-        raise NotImplementedError
-
-    @staticmethod
-    async def get_model_response(
-        url: str,
-        model_name: str,
-        messages: List[MessageModel],
-        token_size: Optional[int] = None,
-        provider: str = "ollama",
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7
-    ) -> str:
-        """Get a full response from a model provider (non-streaming)."""
-        raise NotImplementedError

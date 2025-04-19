@@ -17,13 +17,10 @@ from localchat.exceptions import (
     DatabaseOperationError
 )
 from localchat.error_handlers import ModelAPIException
-from localchat.streaming import stream_model_response, create_streaming_response
 from localchat.services.chat_service import ChatService
 from localchat.services.profile_service import ProfileService
-
-# Import get_model_response from wherever it's defined
-# This might be from model_service.py or another location
 from localchat.services.model_service import ModelService
+from localchat.services.streaming_service import StreamingService
 
 logger = logging.getLogger("localchat")
 
@@ -35,7 +32,8 @@ class MessageService:
         db: Session = Depends(get_db_dependency),
         chat_service: ChatService = Depends(ChatService),
         profile_service: ProfileService = Depends(ProfileService),
-        model_service: ModelService = Depends(ModelService)
+        model_service: ModelService = Depends(ModelService),
+        streaming_service: StreamingService = Depends(StreamingService)
     ):
         """
         Initializes the MessageService with database and service dependencies.
@@ -50,6 +48,7 @@ class MessageService:
         self.chat_service = chat_service
         self.profile_service = profile_service
         self.model_service = model_service
+        self.streaming_service = streaming_service
 
     def get_messages(
         self, 
@@ -265,7 +264,7 @@ class MessageService:
         request_id: str
     ):
         """
-        Handle streaming response from the model API.
+        Handle streaming response from the model API by delegating to StreamingService.
         
         Args:
             chat_id: The ID of the chat.
@@ -280,101 +279,13 @@ class MessageService:
             ModelAPIException: If there's an error communicating with the model API.
         """
         try:
-            # Create a new empty message to be filled with the streamed content
-            assistant_message = MessageModel(
+            # Delegate streaming response handling to the StreamingService
+            return await self.streaming_service.create_streaming_response_for_chat(
                 chat_id=chat_id,
-                role="assistant",
-                content=""  # Will be filled after streaming completes
-            )
-            self.db.add(assistant_message)
-            self.db.commit()
-            self.db.refresh(assistant_message)
-            
-            logger.info(
-                f"Created empty assistant message (ID: {assistant_message.id}) for streaming in chat {chat_id}",
-                extra={
-                    "request_id": request_id,
-                    "message_id": assistant_message.id,
-                    "streaming": True
-                }
-            )
-            
-            # Create a generator for the streaming response
-            response_generator = stream_model_response(
-                url=profile.url,
-                model_name=profile.model_name,
                 messages=previous_messages,
-                token_size=profile.token_size,
-                provider=profile.provider or "ollama"
+                profile=profile,
+                request_id=request_id
             )
-            
-            # Create a background task to save the complete response
-            async def save_complete_response():
-                try:
-                    full_response = ""
-                    async for chunk in stream_model_response(
-                        url=profile.url,
-                        model_name=profile.model_name,
-                        messages=previous_messages,
-                        token_size=profile.token_size,
-                        provider=profile.provider or "custom",  # Pass provider info
-                        stream=False  # Get the full response in one go
-                    ):
-                        full_response += chunk
-                    
-                    # Create a new session for the background task
-                    # to avoid session conflicts
-                    bg_db = SessionLocal()
-                    try:
-                        # Update the message with the complete response
-                        db_message = bg_db.query(MessageModel).filter(
-                            MessageModel.id == assistant_message.id
-                        ).first()
-                        
-                        if db_message and full_response.strip():
-                            db_message.content = full_response
-                            bg_db.commit()
-                            
-                            logger.info(
-                                f"Updated assistant message (ID: {assistant_message.id}) with complete response",
-                                extra={
-                                    "request_id": request_id,
-                                    "message_id": assistant_message.id,
-                                    "content_length": len(full_response)
-                                }
-                            )
-                        else:
-                            logger.warning(
-                                f"Could not update assistant message (ID: {assistant_message.id}) - "
-                                f"Message not found or empty response",
-                                extra={
-                                    "request_id": request_id,
-                                    "message_id": assistant_message.id,
-                                    "found": db_message is not None,
-                                    "response_length": len(full_response) if full_response else 0
-                                }
-                            )
-                    except Exception as e:
-                        logger.error(
-                            f"Error saving complete response for message {assistant_message.id}: {str(e)}",
-                            extra={"request_id": request_id},
-                            exc_info=True
-                        )
-                    finally:
-                        bg_db.close()
-                except Exception as e:
-                    logger.error(
-                        f"Error in background task for message {assistant_message.id}: {str(e)}",
-                        extra={"request_id": request_id},
-                        exc_info=True
-                    )
-            
-            # Start the background task
-            asyncio.create_task(save_complete_response())
-            
-            # Return the streaming response
-            return create_streaming_response(response_generator)
-            
         except Exception as e:
             logger.error(
                 f"Error setting up streaming response: {str(e)}",
