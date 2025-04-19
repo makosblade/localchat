@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any
 import logging
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from .models import (
     Profile, ProfileCreate,
@@ -13,11 +13,11 @@ from .exceptions import (
     # Profile exceptions
     ProfileNotFoundError, ProfileCreationError, ProfileUpdateError, ProfileDeletionError,
     # Chat exceptions
-    ChatNotFoundError, ChatCreationError, ChatUpdateError, ChatDeletionError,
+    ChatNotFoundError, ChatCreationError, ChatDeletionError,
     # Message exceptions
-    MessageCreationError, MessageFetchError, MessageUpdateError,
+    MessageCreationError, MessageFetchError,
     # Model/Provider exceptions
-    ModelInteractionError, ProviderConfigurationError, ModelNotFoundError,
+    ModelInteractionError, ProviderConfigurationError,
     # Generic exceptions
     DatabaseOperationError
 )
