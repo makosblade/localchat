@@ -82,6 +82,17 @@ export const getOllamaModels = async (baseUrl?: string): Promise<OllamaModel[]> 
   return response.data;
 }
 
+// Create an AbortController for streaming requests
+let streamController: AbortController | null = null;
+
+// Function to cancel ongoing streaming requests
+export const cancelStreamingResponse = (): void => {
+  if (streamController) {
+    streamController.abort();
+    streamController = null;
+  }
+};
+
 export const sendMessage = async (
   chatId: number, 
   message: MessageFormData,
@@ -107,13 +118,18 @@ export const sendMessage = async (
   const params = new URLSearchParams({ stream: 'true' });
   const url = `${API_URL}/chats/${chatId}/messages/?${params}`;
   
+  // Create a new AbortController for this request
+  streamController = new AbortController();
+  const { signal } = streamController;
+  
   // Make the request using fetch to support streaming
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(message)
+    body: JSON.stringify(message),
+    signal
   });
   
   if (!response.ok) {
@@ -131,6 +147,14 @@ export const sendMessage = async (
   // Start reading the stream
   const readStream = async () => {
     try {
+      // Add event listener for abort
+      signal.addEventListener('abort', () => {
+        reader.cancel();
+        if (options?.onComplete) {
+          options.onComplete();
+        }
+      });
+      
       while (true) {
         const { done, value } = await reader.read();
         
@@ -148,7 +172,9 @@ export const sendMessage = async (
             const data = line.substring(6); // Remove 'data: ' prefix
             // Call the callback with the new chunk
             if (options?.onChunk && data) {
-              options.onChunk(data);
+              // Create a MessageEvent-like object to pass to the callback
+              const event = new MessageEvent('message', { data });
+              options.onChunk(event);
             }
           }
         }

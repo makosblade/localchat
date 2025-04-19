@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import ProfileManager from './components/ProfileManager'
 import Chat from './components/Chat'
+import ChatList from './components/ChatList'
 import { Profile } from './types'
 
 const App = () => {
@@ -21,6 +22,15 @@ const App = () => {
               <ProfileManager 
                 onSelectProfile={setSelectedProfile}
                 selectedProfile={selectedProfile}
+              />
+            } 
+          />
+          <Route 
+            path="/chats" 
+            element={
+              <ChatList 
+                selectedProfile={selectedProfile}
+                onSelectProfile={setSelectedProfile}
               />
             } 
           />

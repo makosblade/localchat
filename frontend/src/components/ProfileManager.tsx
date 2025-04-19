@@ -185,6 +185,18 @@ const ProfileManager = ({ onSelectProfile, selectedProfile }: ProfileManagerProp
     createChatMutation.mutate(chatData)
   }
   
+  // Navigate to the profile's chat history
+  const handleViewChats = (profileId: number) => {
+    // Set this profile as the selected profile
+    const profile = profiles.find(p => p.id === profileId)
+    if (profile) {
+      onSelectProfile(profile)
+    }
+    
+    // Navigate to the chat history page with a query parameter for the profile
+    navigate(`/chats?profile=${profileId}`)
+  }
+  
   const resetForm = () => {
     setFormData({
       name: '',
@@ -488,7 +500,7 @@ const ProfileManager = ({ onSelectProfile, selectedProfile }: ProfileManagerProp
                   <p className="text-xs text-blue-400 mt-1">✓ Supports streaming</p>
                 )}
               </div>
-              <div className="mt-4 flex space-x-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => handleStartChat(profile)}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -497,6 +509,12 @@ const ProfileManager = ({ onSelectProfile, selectedProfile }: ProfileManagerProp
                   {createChatMutation.isPending && selectedProfile?.id === profile.id
                     ? 'Starting...'
                     : 'Start Chat'}
+                </button>
+                <button
+                  onClick={() => handleViewChats(profile.id)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  View Chats
                 </button>
                 <button
                   onClick={() => handleEdit(profile)}

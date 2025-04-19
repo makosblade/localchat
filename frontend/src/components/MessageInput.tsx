@@ -1,20 +1,24 @@
 import React from 'react'
-import { FiSend } from 'react-icons/fi'
+import { FiSend, FiSquare } from 'react-icons/fi'
 
 interface MessageInputProps {
   value: string
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   onSubmit: (e: React.FormEvent) => void
+  onStopStreaming?: () => void
   disabled?: boolean
   isLoading?: boolean
+  isStreaming?: boolean
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
   value,
   onChange,
   onSubmit,
+  onStopStreaming,
   disabled = false,
   isLoading = false,
+  isStreaming = false,
 }) => {
   // Auto-resize textarea based on content
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -59,17 +63,28 @@ const MessageInput: React.FC<MessageInputProps> = ({
             </span>
           )}
         </div>
-        <button
-          type="submit"
-          className={`p-3 rounded-lg ${
-            disabled || !value.trim()
-              ? 'bg-gray-600 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-          disabled={disabled || !value.trim()}
-        >
-          <FiSend className="text-white" />
-        </button>
+        {isStreaming ? (
+          <button
+            type="button"
+            onClick={onStopStreaming}
+            className="p-3 rounded-lg bg-red-600 hover:bg-red-700 transition-colors"
+            title="Stop streaming response"
+          >
+            <FiSquare className="text-white" />
+          </button>
+        ) : (
+          <button
+            type="submit"
+            className={`p-3 rounded-lg ${
+              disabled || !value.trim()
+                ? 'bg-gray-600 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+            disabled={disabled || !value.trim()}
+          >
+            <FiSend className="text-white" />
+          </button>
+        )}
       </form>
     </div>
   )

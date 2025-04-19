@@ -76,7 +76,7 @@ export interface ApiError {
 
 export interface StreamingOptions {
   streaming: boolean;
-  onChunk?: (chunk: string) => void;
+  onChunk?: (chunk: MessageEvent) => void;
   onComplete?: () => void;
   onError?: (error: any) => void;
 }
